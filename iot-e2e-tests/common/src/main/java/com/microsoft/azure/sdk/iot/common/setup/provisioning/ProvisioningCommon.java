@@ -100,7 +100,6 @@ public class ProvisioningCommon extends IntegrationTest
     //sending reported properties for twin operations takes some time to get the appropriate callback
     public static final int MAX_TWIN_PROPAGATION_WAIT_SECONDS = 60;
 
-    @Parameterized.Parameters(name = "{0} using {1}")
     public static Collection inputs(AttestationType attestationType) throws Exception
     {
         if (attestationType == AttestationType.SYMMETRIC_KEY || attestationType == AttestationType.X509)
@@ -133,7 +132,28 @@ public class ProvisioningCommon extends IntegrationTest
         {
             throw new IllegalArgumentException("Unknown attestation type provided");
         }
+    }
 
+    public static Collection inputs() throws Exception
+    {
+        return Arrays.asList(
+                new Object[][]
+                        {
+                                {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
+
+                                {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM}
+                        });
     }
 
     public ProvisioningCommon(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)

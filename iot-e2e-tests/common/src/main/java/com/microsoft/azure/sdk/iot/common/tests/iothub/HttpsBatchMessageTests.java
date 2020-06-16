@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot.iothub;
+package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 /** Integration tests for HttpsBatchMessage. */
 @IotHubTest
-public class HttpsBatchMessageJVMRunner extends IntegrationTest
+public class HttpsBatchMessageTests extends IntegrationTest
 {
     protected Charset UTF8 = StandardCharsets.UTF_8;
 

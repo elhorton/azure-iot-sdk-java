@@ -15,8 +15,11 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
@@ -29,11 +32,21 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
 @IotHubTest
+@RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
 {
     public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
+
+    @Parameterized.Parameters(name = "{0} with {1} auth using {2}")
+    public static Collection inputsCommons() throws Exception
+    {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        return inputsCommon();
     }
 
     @Test

@@ -25,6 +25,6 @@ public class JobClientAndroidRunner extends JobClientTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
-        JobClientTests.setUp();
+        JobClientTests.setUpCommon();
     }
 }

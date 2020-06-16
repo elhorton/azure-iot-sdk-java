@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot.iothub;
+package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertThat;
 
 /** Integration tests for IotHubEventUri. */
 @IotHubTest
-public class IotHubEventUriJVMRunner extends IntegrationTest
+public class IotHubEventUriTests extends IntegrationTest
 {
     @Test
     public void eventUriIsCorrect() throws URISyntaxException

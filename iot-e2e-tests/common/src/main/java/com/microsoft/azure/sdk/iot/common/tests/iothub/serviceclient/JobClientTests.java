@@ -5,10 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
@@ -23,9 +20,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -66,6 +61,39 @@ public class JobClientTests extends IntegrationTest
 
     private static final int MAX_NUMBER_JOBS = 3;
     private static final long MAX_EXECUTION_TIME_IN_SECONDS = 15;
+
+    @BeforeClass
+    public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    {
+        if (iotHubConnectionString == null || iotHubConnectionString.isEmpty())
+        {
+            iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+            isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+            isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        }
+        
+        // If the environment variable isn't set, then it is likely because it is an android device running these tests
+        // If running these tests on android, a different method will get the environment variables, and then call setUpCommon().
+        if (iotHubConnectionString != null && iotHubConnectionString != "")
+        {
+            setUpCommon();
+        }
+    }
+
+    public static void setUpCommon() throws IOException, InterruptedException, IotHubException, URISyntaxException
+    {
+        jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+
+        String uuid = UUID.randomUUID().toString();
+        for (int i = 0; i < MAX_DEVICES; i++)
+        {
+            testDevice = Tools.addDeviceWithRetry(registryManager, Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
+            DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
+            testManager.setup(true, true);
+            devices.add(testManager);
+        }
+    }
 
     private JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
@@ -117,21 +145,6 @@ public class JobClientTests extends IntegrationTest
             }
         }
         throw new AssertionError("queryDeviceJob did not find the job");
-    }
-
-    public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException
-    {
-        jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-
-        String uuid = UUID.randomUUID().toString();
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            testDevice = Tools.addDeviceWithRetry(registryManager, Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
-            DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
-            testManager.setup(true, true);
-            devices.add(testManager);
-        }
     }
 
     @Before
@@ -188,6 +201,7 @@ public class JobClientTests extends IntegrationTest
     }
 
     @Test (timeout=TEST_TIMEOUT_MS)
+    @Ignore
     public void scheduleUpdateTwinSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
@@ -275,6 +289,7 @@ public class JobClientTests extends IntegrationTest
     }
 
     @Test (timeout=TEST_TIMEOUT_MS)
+    @Ignore
     public void scheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
@@ -362,6 +377,7 @@ public class JobClientTests extends IntegrationTest
 
     @Test (timeout=TEST_TIMEOUT_MS)
     @ContinuousIntegrationTest
+    @Ignore
     public void mixScheduleInFutureSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
@@ -485,6 +501,7 @@ public class JobClientTests extends IntegrationTest
 
     @Test (timeout=TEST_TIMEOUT_MS)
     @ContinuousIntegrationTest
+    @Ignore
     public void cancelScheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange

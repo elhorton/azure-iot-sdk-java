@@ -7,6 +7,8 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.twin;
 
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
+import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
@@ -20,6 +22,8 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -37,6 +41,7 @@ import static org.junit.Assert.*;
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
 @IotHubTest
+@RunWith(Parameterized.class)
 public class DesiredPropertiesTests extends DeviceTwinCommon
 {
     private JsonParser jsonParser = new JsonParser();
@@ -45,6 +50,22 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
         jsonParser = new JsonParser();
+    }
+
+    @Parameterized.Parameters(name = "{0} with {1} auth using {2}")
+    public static Collection inputs() throws Exception
+    {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        if (!isBasicTierHub)
+        {
+            return DeviceTwinCommon.inputsCommon();
+        }
+        else
+        {
+            return DeviceTwinCommon.inputsCommon(ClientType.DEVICE_CLIENT);
+        }
     }
 
     @Before

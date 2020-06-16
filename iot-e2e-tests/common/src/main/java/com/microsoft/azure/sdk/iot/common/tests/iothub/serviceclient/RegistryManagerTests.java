@@ -54,10 +54,17 @@ public class RegistryManagerTests extends IntegrationTest
     protected static int testProxyPort = 8879;
     
     private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
-    
+
+    @BeforeClass
     public static void setUp() throws IOException
     {
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        if (iotHubConnectionString == null || iotHubConnectionString.isEmpty())
+        {
+            iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+            isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+            isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+            hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        }
     }
 
     public RegistryManagerTests.RegistryManagerTestInstance testInstance;
@@ -91,7 +98,6 @@ public class RegistryManagerTests extends IntegrationTest
                 .withPort(testProxyPort)
                 .start();
     }
-
 
     @AfterClass
     public static void stopProxy()

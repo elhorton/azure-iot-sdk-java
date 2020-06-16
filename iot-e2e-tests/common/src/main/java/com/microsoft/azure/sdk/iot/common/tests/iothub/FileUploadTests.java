@@ -19,6 +19,8 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
@@ -48,6 +50,7 @@ import static org.junit.Assert.*;
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
 @IotHubTest
+@RunWith(Parameterized.class)
 public class FileUploadTests extends IntegrationTest
 {
     // Max time to wait to see it on Hub
@@ -123,13 +126,23 @@ public class FileUploadTests extends IntegrationTest
     static AtomicBoolean hasFileUploadNotificationReceiverThreadFailed = new AtomicBoolean(false);
     static Exception fileUploadNotificationReceiverThreadException = null;
 
+    @Parameterized.Parameters(name = "{0} {1} with proxy? {2}")
     public static Collection inputs() throws Exception
     {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
         X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        return inputs(certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
+        return inputsCommon(certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
     }
 
-    public static Collection inputs(String publicK, String privateK, String thumbprint) throws Exception
+    public static Collection inputsCommon() throws Exception
+    {
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        return inputsCommon(certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
+    }
+
+    public static Collection inputsCommon(String publicK, String privateK, String thumbprint) throws Exception
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 

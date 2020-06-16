@@ -15,6 +15,8 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
@@ -34,6 +36,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 import static junit.framework.TestCase.fail;
 
 @IotHubTest
+@RunWith(Parameterized.class)
 public class HubTierConnectionTests extends IntegrationTest
 {
     protected static final long WAIT_FOR_DISCONNECT_TIMEOUT = 1 * 60 * 1000; // 1 minute
@@ -60,6 +63,16 @@ public class HubTierConnectionTests extends IntegrationTest
     public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
     {
         this.testInstance = new HubTierConnectionTestInstance(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
+    }
+
+    @Parameterized.Parameters(name = "{1} with {3} with proxy? {7}")
+    public static Collection inputs() throws Exception
+    {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        Collection inputs = inputsCommon();
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        return inputs;
     }
 
     @BeforeClass
@@ -217,30 +230,6 @@ public class HubTierConnectionTests extends IntegrationTest
         testInstance.client.closeNow();
     }
 
-    public static Collection<BaseDevice> getIdentities(Collection inputs)
-    {
-        Set<BaseDevice> identities = new HashSet<>();
-
-        Object[] inputArray = inputs.toArray();
-        for (int i = 0; i < inputs.size(); i++)
-        {
-            Object[] inputsInstance = (Object[]) inputArray[i];
-            identities.add((BaseDevice) inputsInstance[2]);
-        }
-
-        return identities;
-    }
-
-    protected static void tearDown(Collection<BaseDevice> identitiesToDispose)
-    {
-        if (registryManager != null)
-        {
-            Tools.removeDevicesAndModules(registryManager, identitiesToDispose);
-            registryManager.close();
-            registryManager = null;
-        }
-    }
-
     public static void waitForDisconnect(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
     {
         //Wait for DISCONNECTED
@@ -255,8 +244,6 @@ public class HubTierConnectionTests extends IntegrationTest
             }
         }
     }
-
-
 
     public static boolean actualStatusUpdatesContainsStatus(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, IotHubConnectionStatus status)
     {

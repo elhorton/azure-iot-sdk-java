@@ -25,8 +25,6 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
@@ -41,15 +39,7 @@ public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        Collection inputs = inputsCommon();
-        identities = getIdentities(inputs);
         isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
-        return inputs;
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
+        return inputsCommon();
     }
 }

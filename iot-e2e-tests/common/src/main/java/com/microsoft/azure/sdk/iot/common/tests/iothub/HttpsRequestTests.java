@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot.iothub;
+package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 
 /** Integration tests for HttpsRequest. */
 @IotHubTest
-public class HttpsRequestJVMRunner extends IntegrationTest
+public class HttpsRequestTests extends IntegrationTest
 {
     @Test
     public void sendHttpsRequestGetsCorrectResponse() throws IOException, TransportException

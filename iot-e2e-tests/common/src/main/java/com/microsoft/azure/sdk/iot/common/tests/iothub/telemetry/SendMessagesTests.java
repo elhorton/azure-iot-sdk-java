@@ -19,6 +19,8 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,11 +41,28 @@ import static junit.framework.TestCase.fail;
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
 @IotHubTest
+@RunWith(Parameterized.class)
 public class SendMessagesTests extends SendMessagesCommon
 {
     public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, withProxy);
+    }
+
+    @Parameterized.Parameters(name = "{0} with {1} auth using {2} with proxy? {6}")
+    public static Collection inputs() throws Exception
+    {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        if (!isBasicTierHub)
+        {
+            return inputsCommon();
+        }
+        else
+        {
+            return inputsCommon(ClientType.DEVICE_CLIENT);
+        }
     }
 
     //TODO this test doesn't seem to check anything that the basic sendMessages test already checks. It just has a different payload. Needs

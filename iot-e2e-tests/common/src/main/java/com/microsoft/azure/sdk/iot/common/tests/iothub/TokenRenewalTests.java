@@ -55,9 +55,27 @@ public class TokenRenewalTests extends IntegrationTest
         timeout = new Timeout(TOKEN_RENEWAL_TEST_TIMEOUT_MILLIS);
     }
 
-    public static void setup() throws IOException
+    public static void setupCommon() throws IOException
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+    }
+
+    @BeforeClass
+    public static void setUp() throws IOException
+    {
+        if (iotHubConnectionString == null || iotHubConnectionString.isEmpty())
+        {
+            iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+            isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+            isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        }
+
+        // If the environment variable isn't set, then it is likely because it is an android device running these tests
+        // If running these tests on android, a different method will get the environment variables, and then call setUpCommon().
+        if (iotHubConnectionString != null && iotHubConnectionString != "")
+        {
+            TokenRenewalTests.setupCommon();
+        }
     }
 
     @BeforeClass

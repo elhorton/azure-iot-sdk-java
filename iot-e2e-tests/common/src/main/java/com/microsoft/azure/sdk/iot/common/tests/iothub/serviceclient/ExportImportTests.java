@@ -6,6 +6,8 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
@@ -18,9 +20,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
 import mockit.Deencapsulation;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -56,7 +56,26 @@ public class ExportImportTests extends IntegrationTest
 
     private static RegistryManager registryManager;
 
+    @BeforeClass
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
+    {
+        if (iotHubConnectionString == null || iotHubConnectionString.isEmpty())
+        {
+            iotHubConnectionString = com.microsoft.azure.sdk.iot.common.helpers.Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+            isBasicTierHub = Boolean.parseBoolean(com.microsoft.azure.sdk.iot.common.helpers.Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+            storageAccountConnectionString = com.microsoft.azure.sdk.iot.common.helpers.Tools.retrieveEnvironmentVariableValue(TestConstants.STORAGE_ACCOUNT_CONNECTION_STRING_ENV_VAR_NAME);
+            isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        }
+
+        // If the environment variable isn't set, then it is likely because it is an android device running these tests
+        // If running these tests on android, a different method will get the environment variables, and then call setUpCommon().
+        if (iotHubConnectionString != null && iotHubConnectionString != "")
+        {
+            setUpCommon();
+        }
+    }
+
+    public static void setUpCommon() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
@@ -106,6 +125,7 @@ public class ExportImportTests extends IntegrationTest
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
     @ContinuousIntegrationTest
+    @Ignore
     public void export_import_e2e() throws Exception
     {
 
@@ -140,6 +160,7 @@ public class ExportImportTests extends IntegrationTest
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
     @ContinuousIntegrationTest
+    @Ignore
     public void export_import_key_based_storage_auth_e2e() throws Exception
     {
         export_import_storage_auth_e2e(StorageAuthenticationType.KEY);
@@ -147,6 +168,7 @@ public class ExportImportTests extends IntegrationTest
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
     @ContinuousIntegrationTest
+    @Ignore
     public void export_import_identity_based_storage_auth_e2e() throws Exception
     {
         export_import_storage_auth_e2e(StorageAuthenticationType.IDENTITY);

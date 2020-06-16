@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
@@ -14,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
@@ -35,6 +37,7 @@ import static org.junit.Assert.*;
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
 @IotHubTest
+@RunWith(Parameterized.class)
 public class ServiceClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
@@ -69,12 +72,21 @@ public class ServiceClientTests extends IntegrationTest
 
     private ServiceClientITRunner testInstance;
 
-    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     @Parameterized.Parameters(name = "{0}")
+    public static Collection inputs() throws IOException
+    {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        invalidCertificateServerConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
+        return ServiceClientTests.inputsCommon();
+    }
+
+
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     public static Collection inputsCommon() throws IOException
     {
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
-
 
         List inputs = Arrays.asList(
                 new Object[][]
